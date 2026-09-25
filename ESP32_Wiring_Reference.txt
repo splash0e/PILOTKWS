@@ -1,0 +1,88 @@
+================================================================
+ RADII — PILOT KWS System
+ ESP32 Hardware Wiring Reference
+ SIH Problem Statement ID: 26172 | Team ID: 215
+================================================================
+
+Controller  : ESP32 DOIT DevKit V1
+Microphone  : INMP441 (I2S digital MEMS microphone)
+Wake Word   : "PILOT"
+
+----------------------------------------------------------------
+1. INMP441 MICROPHONE -> ESP32 CONNECTIONS
+----------------------------------------------------------------
+
+  INMP441 Pin        ESP32 Pin        Function
+  -----------        ---------        --------
+  VDD                3.3V             Power supply
+  GND                GND              Common ground
+  SCK / BCLK         GPIO 26          I2S bit clock
+  WS / LRCL          GPIO 25          I2S word / LR clock
+  SD / DOUT          GPIO 33          Digital audio data output
+  L/R                GND              Left-channel selection
+
+----------------------------------------------------------------
+2. STATUS LED -> ESP32 CONNECTIONS
+----------------------------------------------------------------
+
+  LED       ESP32 Pin      Working Logic
+  ---       ---------      -------------
+  RED       GPIO 2         HIGH = ON. Indicates the device is in
+                            listening / KWS monitoring state.
+
+  BLUE      GPIO 4         HIGH = ON only when PILOT is detected
+                            (see detection logic below).
+                            Otherwise OFF.
+
+----------------------------------------------------------------
+3. PILOT DETECTION LOGIC
+----------------------------------------------------------------
+
+  The ESP32 continuously captures ~1-second audio windows from
+  the INMP441 and runs them through the on-device keyword-
+  spotting (KWS) model. The model outputs three confidence
+  values: Background, Negative, and PILOT.
+
+  BLUE LED turns ON when BOTH conditions are true:
+    (a) PILOT confidence >= 0.04
+    (b) PILOT is the strongest class
+        (PILOT > Background  AND  PILOT > Negative)
+
+  Otherwise, BLUE LED remains OFF.
+
+  The serial monitor (115200 baud) prints all three confidence
+  values and the resulting BLUE LED state for every inference
+  cycle.
+
+----------------------------------------------------------------
+4. COMPLETE SIGNAL FLOW
+----------------------------------------------------------------
+
+  Step   Block          Operation
+  ----   -----          ---------
+   1     INMP441        Captures voice / ambient audio.
+   2     I2S -> ESP32   Audio enters via BCLK (GPIO26),
+                         WS (GPIO25), DOUT (GPIO33).
+   3     KWS Model      Classifies Background / Negative / PILOT.
+   4     Decision       Checks PILOT >= 0.04 AND PILOT strongest.
+   5     BLUE LED       ON if condition true; otherwise OFF.
+
+----------------------------------------------------------------
+5. QUICK PIN SUMMARY
+----------------------------------------------------------------
+
+  INMP441 VDD   -> 3.3V
+  INMP441 GND   -> GND
+  INMP441 BCLK  -> GPIO 26
+  INMP441 WS    -> GPIO 25
+  INMP441 DOUT  -> GPIO 33
+  INMP441 L/R   -> GND
+  RED LED       -> GPIO 2
+  BLUE LED      -> GPIO 4
+
+  NOTE: All grounds (INMP441, RED LED, BLUE LED) are common
+  and must be tied to the same ESP32 GND reference.
+
+================================================================
+ End of Wiring Reference — RADII Team
+================================================================
