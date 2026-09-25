@@ -1,7 +1,6 @@
 ================================================================
  RADII — PILOT KWS System
  ESP32 Hardware Wiring Reference
- SIH Problem Statement ID: 26172 | Team ID: 215
 ================================================================
 
 Controller  : ESP32 DOIT DevKit V1
